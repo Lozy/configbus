@@ -1,0 +1,46 @@
+server {
+    listen       80  default_server;
+    server_name  _;
+    return       444;
+}
+
+server {
+    listen      80;
+    server_name DOMAIN;
+
+    index index.html index.htm index.php;
+    root  /home/www-data/site/DOMAIN;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    error_page 404 /404.html;
+    error_page 500 502 503 504 /50x.html;
+
+    location = /50x.html {
+         root /home/www-data/site/default;
+    }
+
+    location ~ \.php$ {
+        try_files $uri =404;
+        fastcgi_pass unix:/var/run/php5-fpm.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    #
+    #   LOG DEFINE
+    #
+
+    # log_not_found off;
+    error_log /home/www-data/log/DOMAIN/error.log error;
+
+    access_log off;
+    # log_format compression '$remote_addr - $remote_user [$time_local] '
+    #                        '"$request" $status $body_bytes_sent '
+    #                        '"$http_referer" "$http_user_agent" "$gzip_ratio"';
+    #
+    # access_log  /home/www-data/log/DOMAIN/access.log compression;
+}
